@@ -8,12 +8,13 @@ from torchvision import transforms, datasets
 import torch.optim as optim
 from tqdm import tqdm
 
-from Medmamba import VSSM as medmamba # import model
-
+from MedMamba import VSSM as medmamba # import model
+from medmnist import INFO, DermaMNIST
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("using {} device.".format(device))
+    print(os.getcwd())
 
     data_transform = {
         "train": transforms.Compose([transforms.RandomResizedCrop(224),
@@ -24,16 +25,24 @@ def main():
                                    transforms.ToTensor(),
                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])}
 
-    train_dataset = datasets.ImageFolder(root="the path of your train set",
-                                         transform=data_transform["train"])
+    model_name = "medMambaOnDermaMnist"
+    data_flag = 'dermamnist'
+
+    info = INFO[data_flag]
+    task = info['task']
+    num_channels = info['n_channels']
+    num_classes = len(info['label'])
+
+    train_dataset = DermaMNIST(split="train", download=True,
+                               transform=data_transform["train"])
     train_num = len(train_dataset)
 
-    flower_list = train_dataset.class_to_idx
-    cla_dict = dict((val, key) for key, val in flower_list.items())
-    # write dict into json file
-    json_str = json.dumps(cla_dict, indent=4)
-    with open('class_indices.json', 'w') as json_file:
-        json_file.write(json_str)
+    # flower_list = train_dataset.class_to_idx
+    # cla_dict = dict((val, key) for key, val in flower_list.items())
+    # # write dict into json file
+    # json_str = json.dumps(cla_dict, indent=4)
+    # with open('class_indices.json', 'w') as json_file:
+    #     json_file.write(json_str)
 
     batch_size = 32
     nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])  # number of workers
@@ -43,8 +52,8 @@ def main():
                                                batch_size=batch_size, shuffle=True,
                                                num_workers=nw)
 
-    validate_dataset = datasets.ImageFolder(root="the path of your validation set",,
-                                            transform=data_transform["val"])
+    validate_dataset = DermaMNIST(split="val", download=True,
+                                  transform=data_transform["val"])
     val_num = len(validate_dataset)
     validate_loader = torch.utils.data.DataLoader(validate_dataset,
                                                   batch_size=batch_size, shuffle=False,
@@ -69,6 +78,7 @@ def main():
         train_bar = tqdm(train_loader, file=sys.stdout)
         for step, data in enumerate(train_bar):
             images, labels = data
+            labels = labels.squeeze() #TODO: this should be done in dataloader
             optimizer.zero_grad()
             outputs = net(images.to(device))
             loss = loss_function(outputs, labels.to(device))
