@@ -1,0 +1,8 @@
+,actinic keratoses and intraepithelial carcinoma,basal cell carcinoma,benign keratosis-like lesions,dermatofibroma,melanoma,melanocytic nevi,vascular lesions
+actinic keratoses and intraepithelial carcinoma,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+basal cell carcinoma,23.0,47.0,12.0,9.0,7.0,24.0,4.0
+benign keratosis-like lesions,13.0,12.0,30.0,1.0,6.0,18.0,0.0
+dermatofibroma,0.0,2.0,2.0,0.0,0.0,0.0,0.0
+melanoma,29.0,36.0,172.0,11.0,200.0,1295.0,14.0
+melanocytic nevi,0.0,0.0,2.0,0.0,7.0,0.0,1.0
+vascular lesions,1.0,6.0,2.0,2.0,3.0,4.0,10.0

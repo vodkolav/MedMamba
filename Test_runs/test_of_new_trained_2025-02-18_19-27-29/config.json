@@ -1,0 +1,1 @@
+{"experiment_name": "test_of_new_trained", "MedMNIST_dataset_name": "DermaMNIST", "image_size": 28, "model_weight_path": "Train_runs/Train_2025-02-18_13-41-36/medmamba_t_Net.pth", "transform": {"resize": [224, 224], "normalize": {"mean": [0.5, 0.5, 0.5], "std": [0.5, 0.5, 0.5]}}, "batch_size": 32, "test_net": "medmamba_t"}

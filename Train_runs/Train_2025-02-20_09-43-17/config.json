@@ -1,0 +1,1 @@
+{"experiment_name": "Train", "MedMNIST_dataset_name": "DermaMNIST", "train_net": "medmamba_t", "fine_tune": false, "image_size": 28, "model_weight_path": "pretrain_weights/DermaMNIST/Medmamba.pth", "transform": {"RandomResizedCrop": 32, "resize": [32, 32], "normalize": {"mean": [0.5, 0.5, 0.5], "std": [0.5, 0.5, 0.5]}}, "batch_size": 32, "learning_rate": 0.0001, "epochs": 100}
