@@ -660,7 +660,7 @@ class VSSLayer_up(nn.Module):
 
 
 class VSSM(nn.Module):
-    def __init__(self, patch_size=4, in_chans=3, num_classes=1000, depths=[2, 2, 4, 2], depths_decoder=[2, 9, 2, 2],
+    def __init__(self, confidence=50, thresh1=True, thresh2=True, a=0.33, b=77.78, c=16.67, patch_size=4, in_chans=3, num_classes=1000, depths=[2, 2, 4, 2], depths_decoder=[2, 9, 2, 2],
                  dims=[96,192,384,768], dims_decoder=[768, 384, 192, 96], d_state=16, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=nn.LayerNorm, patch_norm=True,
                  use_checkpoint=False, **kwargs):
@@ -672,7 +672,12 @@ class VSSM(nn.Module):
         self.embed_dim = dims[0]
         self.num_features = dims[-1]
         self.dims = dims
-
+        self.confidence = confidence
+        self.thresh1 = thresh1
+        self.thresh2 = thresh2
+        self.a = a
+        self.b = b
+        self.c = c
         self.patch_embed = PatchEmbed2D(patch_size=patch_size, in_chans=in_chans, embed_dim=self.embed_dim,
             norm_layer=norm_layer if patch_norm else None)
 
@@ -763,14 +768,30 @@ class VSSM(nn.Module):
         second_max_probs = sorted_probs[:, 1]
 
         # Rejection logic based on threshold
-        should_reject = (max_probs < 0.5) | (max_probs / second_max_probs < 1.2)
+
+        threshold1 = 1 - (self.confidence/100)
+        if self.confidence == 0:
+            threshold2 = 100000000
+        else:
+            threshold2 = self.a + self.b / (self.confidence + self.c)
+        print(f'Confidence: {self.confidence}')
+        if self.thresh1 is True and self.thresh2 is True:
+            should_reject = (max_probs < threshold1) | (max_probs / second_max_probs < threshold2)
+            print(f'Threshold1: {threshold1}')
+            print(f'Threshold2: {threshold2}')
+        if self.thresh1 is True and self.thresh2 is False:
+            should_reject = (max_probs < threshold1)
+            print(f'Threshold1: {threshold1}')
+        if self.thresh1 is False and self.thresh2 is True:
+            should_reject = (max_probs / second_max_probs < threshold2)
+            print(f'Threshold2: {threshold2}')
 
         return softmax_probs, preds, should_reject
 
 
-medmamba_t = VSSM(depths=[2, 2, 4, 2],dims=[96,192,384,768],num_classes=6).to("cuda")
-medmamba_s = VSSM(depths=[2, 2, 8, 2],dims=[96,192,384,768],num_classes=6).to("cuda")
-medmamba_b = VSSM(depths=[2, 2, 12, 2],dims=[128,256,512,1024],num_classes=6).to("cuda")
+medmamba_t = VSSM(depths=[2, 2, 4, 2],dims=[96,192,384,768],num_classes=7).to("cuda")
+medmamba_s = VSSM(depths=[2, 2, 8, 2],dims=[96,192,384,768],num_classes=7).to("cuda")
+medmamba_b = VSSM(depths=[2, 2, 12, 2],dims=[128,256,512,1024],num_classes=7).to("cuda")
 
 data = torch.randn(1,3,224,224).to("cuda")
 

@@ -1,0 +1,9 @@
+,actinic keratoses and intraepithelial carcinoma,basal cell carcinoma,benign keratosis-like lesions,dermatofibroma,melanoma,melanocytic nevi,vascular lesions,Rejected
+actinic keratoses and intraepithelial carcinoma,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+basal cell carcinoma,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+benign keratosis-like lesions,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+dermatofibroma,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+melanoma,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+melanocytic nevi,13.0,44.0,125.0,7.0,177.0,1249.0,14.0,0.0
+vascular lesions,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Rejected,53.0,59.0,95.0,16.0,46.0,92.0,15.0,0.0

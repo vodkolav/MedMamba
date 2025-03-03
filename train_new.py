@@ -17,18 +17,18 @@ def main():
     print("using {} device.".format(device))
     print(os.getcwd())
     # Create configuration dictionary
-    config = dict(experiment_name="Train",
+    config = dict(experiment_name="Train_lr_change_image_224_bs_32",
                   MedMNIST_dataset_name="DermaMNIST",
                   train_net="medmamba_t",
                   fine_tune=False,
                   image_size= 224,
-                  model_weight_path ='pretrain_weights/DermaMNIST/Medmamba.pth',
+                  model_weight_path ='Train_runs/Train_lr_change_image_224_2025-03-03_00-47-47/medmamba_t_Net.pth',
                   transform= dict(RandomResizedCrop=(224),
                                   resize=(224, 224),
                                   normalize={"mean": [0.5, 0.5, 0.5],
                                               "std": [0.5, 0.5, 0.5]}),
                   batch_size=32,
-                  learning_rate=0.0001,
+                  learning_rate=0.001,
                   epochs=100
                   )
 
@@ -50,8 +50,8 @@ def main():
         json.dump(config, json_file)
 
     data_transform = {
-        "train": transforms.Compose([transforms.RandomResizedCrop(config["transform"]["RandomResizedCrop"]),
-                                     transforms.RandomHorizontalFlip(),
+        "train": transforms.Compose([transforms.Resize((config["transform"]["resize"])), #([transforms.RandomResizedCrop(config["transform"]["RandomResizedCrop"]),
+                                     #transforms.RandomHorizontalFlip(),
                                      transforms.ToTensor(),
                                      transforms.Normalize(mean=config["transform"]["normalize"]["mean"],
                                  std=config["transform"]["normalize"]["std"])]),
@@ -115,7 +115,7 @@ def main():
 
     net.to(device)
     loss_function = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=config["learning_rate"])
+    optimizer = optim.AdamW(net.parameters(), lr=config["learning_rate"])
 
     epochs = config["epochs"]
     best_acc = 0.0
@@ -130,6 +130,10 @@ def main():
         running_loss = 0.0
         train_bar = tqdm(train_loader, file=sys.stdout)
         for step, data in enumerate(train_bar):
+            # Adjust learning rate based on specific epochs
+            if epoch == 50 or epoch == 75:
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] *= 0.1  # Reduce learning rate by a factor of 0.1
             images, labels = data
             labels = labels.squeeze() #TODO: this should be done in dataloader
             optimizer.zero_grad()

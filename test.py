@@ -138,10 +138,10 @@ class ConfusionMatrix(object):
 if __name__ == '__main__':
     # Create configuration dictionary
     config = {
-        "experiment_name": "test_of_new_trained_224",
+        "experiment_name": "test_of_pre_trained_28",
         "MedMNIST_dataset_name": "DermaMNIST",
-        "image_size": 224,
-        "model_weight_path": 'Train_runs/Train_2025-02-22_14-08-32/medmamba_t_Net.pth',
+        "image_size": 28,
+        "model_weight_path": 'pretrain_weights/DermaMNIST/Medmamba.pth', #'Train_runs/Train_lr_change_image_28_2025-03-01_18-19-32/medmamba_t_Net.pth', #'Train_runs/Train_2025-02-22_14-08-32/medmamba_t_Net.pth',
         "transform": {
             "resize": (224, 224),
             "normalize": {
