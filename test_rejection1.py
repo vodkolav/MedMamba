@@ -190,7 +190,7 @@ class Init:
         experiment_name="test_of_test_set_trained_224_lr_bs32_with_rejection",
         MedMNIST_dataset_name="DermaMNIST",
         image_size=224,
-        model_weight_path='Train_runs/Train_lr_change_image_224_bs_32_2025-03-03_10-35-44/medmamba_t_Net.pth', #'Train_runs/Train_2025-02-22_14-08-32/medmamba_t_Net.pth',
+        model_weight_path='Train_runs/Train_2025-02-22_14-08-32/medmamba_t_Net.pth',
         transform=dict(
             resize=(224, 224),
             normalize=dict(
@@ -201,14 +201,14 @@ class Init:
         batch_size=32,
         test_net="medmamba_t",  # Choose the appropriate one
         # input "single_confidence_value" for testing a single confidence value or "scan_confidence_values" for multiple
-        test_type="single_confidence_value",
+        test_type="scan_confidence_values",
         confidence=100,
         confidence_values=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
         thresh1=False,
         thresh2=True,
-        a=-35,
-        b=18000,
-        c=400
+        a=-5.9,
+        b=942,
+        c=36.4
     )
 
 

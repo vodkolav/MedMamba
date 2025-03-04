@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Optimized parameters
-a = 0.5
-b = 75.0
-c = 50.0
+a = -35
+b = 18000
+c = 400
 
 # Define the function for y
 def equation(x):
@@ -16,7 +16,7 @@ y_values = equation(x_values)
 
 # Create the plot
 plt.figure(figsize=(8, 5))
-plt.plot(x_values, y_values, label=r'$y = 0.5 + \frac{75}{x + 50}$', color='blue')
+plt.plot(x_values, y_values, label=r'$y = -35 + \frac{18000}{x + 400}$', color='blue')
 plt.scatter([0, 100, 50], [2, 1, 1.25], color='red', label='Data Points', zorder=5)  # Points to match original conditions
 plt.title('Plot of the Equation')
 plt.xlabel('x')
@@ -26,8 +26,8 @@ plt.axhline(0, color='gray', lw=0.5, ls='--')  # x-axis
 plt.axvline(0, color='gray', lw=0.5, ls='--')  # y-axis
 plt.grid()
 plt.legend()
-plt.ylim(-0.5, 2)  # Set y limits for better visibility
+plt.ylim(-0.5, 20)  # Set y limits for better visibility
 plt.xlim(0, 100)  # Set x limits for better visibility
 # Save the plot
-plt.savefig('Equation_plot3.png')  # Save the plot
+plt.savefig('Equation_plot_a_-35_b_18000_c_400.png')  # Save the plot
 plt.close()  # Close the plot to free memory
