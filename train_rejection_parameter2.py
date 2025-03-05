@@ -50,7 +50,7 @@ def main():
     print("using {} device.".format(device))
     print(os.getcwd())
     # Create configuration dictionary
-    config = dict(experiment_name="Train_rejection_parameter_image_size_224_batch_size_128",
+    config = dict(experiment_name="Train_rejection_parameter2_image_size_224_batch_size_128",
                   MedMNIST_dataset_name="DermaMNIST",
                   train_net="medmamba_t",
                   image_size= 224,
@@ -63,6 +63,7 @@ def main():
                   learning_rate=0.01,
                   epochs=100,
                   b_init=5,
+                  Hyperparameter=1
                   )
 
     # Dataset name to class mapping
@@ -289,10 +290,12 @@ def main():
             # Implement the reward/loss function considering AUC as x and net.b as y
             x = auc_tensor
             y = net.b
-            f = x ** 2 + y ** 2 + 2 * x + 8 * y
+            L = config["Hyperparameter"]
+            E = 0.0000001
+            f = 1/(E +x) + L /(E * y)
 
             # Minimize the negative of this function to maximize f
-            loss = -f
+            loss = f
             loss.backward()
             optimizer.step()
 
@@ -441,14 +444,14 @@ def main():
         plt.savefig(os.path.join(experiment_directory, f'Mean_AUC_epoch.png'))
         plt.close()  # Close plot to free memory
 
-    full_train_metrics_df = pd.DataFrame(training_metrics)
-    full_train_metrics_df.to_csv(os.path.join(experiment_directory, 'full_training_auc_df.csv'), index=False)
-    full_val_metrics_df = pd.DataFrame(val_metrics)
-    full_val_metrics_df.to_csv(os.path.join(experiment_directory, 'full_validation_auc_df.csv'), index=False)
-    training_auc_df = pd.DataFrame(auc_history)
-    training_auc_df.to_csv(os.path.join(experiment_directory, 'training_auc_df.csv'), index=False)
-    val_auc_df = pd.DataFrame(val_auc_history)
-    val_auc_df.to_csv(os.path.join(experiment_directory, 'validation_auc_df.csv'), index=False)
+        full_train_metrics_df = pd.DataFrame(training_metrics)
+        full_train_metrics_df.to_csv(os.path.join(experiment_directory, 'full_training_auc_df.csv'), index=False)
+        full_val_metrics_df = pd.DataFrame(val_metrics)
+        full_val_metrics_df.to_csv(os.path.join(experiment_directory, 'full_validation_auc_df.csv'), index=False)
+        training_auc_df = pd.DataFrame(auc_history)
+        training_auc_df.to_csv(os.path.join(experiment_directory, 'training_auc_df.csv'), index=False)
+        val_auc_df = pd.DataFrame(val_auc_history)
+        val_auc_df.to_csv(os.path.join(experiment_directory, 'validation_auc_df.csv'), index=False)
 
     print(f'Finished Training.')
     print(f'Best Training AUC: {best_auc:.3f} with b: {best_b:.3f}')

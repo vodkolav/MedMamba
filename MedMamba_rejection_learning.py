@@ -758,8 +758,11 @@ class VSSM(nn.Module):
         # Apply softmax to get class probabilities
         softmax_probs = F.softmax(x, dim=1)
 
-        # Calculate rejection threshold using the new self.b
-        y_thresh = (1 - self.b) * confidence / 100 + self.b
+        if confidence == 0:
+            y_thresh = 10000000000
+        else:
+            # Calculate rejection threshold using the new self.b
+            y_thresh = (1 - self.b) * confidence / 100 + self.b
 
         # Determine maximum probability and second maximum probability
         max_probs, preds = torch.max(softmax_probs, dim=1)
