@@ -11,7 +11,7 @@ import matplotlib
 from sklearn.metrics import roc_auc_score, f1_score, auc
 
 matplotlib.use('Agg')  # Use a non-interactive backend
-from MedMamba_rejection_learning import VSSM
+from MedMamba_rejection_learning_exp import VSSM
 from medmnist import INFO, DermaMNIST
 
 
@@ -187,10 +187,10 @@ class ConfusionMatrix(object):
 class Init:
     # Create configuration dictionary
     config = dict(
-        experiment_name="test_with_weights_of_b_parameter_training_exp_2.1_parameter_Hyperparameter_0.00175_Ridge_alfa_1",
+        experiment_name="test_with_weights_of_b_parameter_training_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1.5",
         MedMNIST_dataset_name="DermaMNIST",
         image_size=224,
-        model_weight_path='Train_runs/Train_rejection_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1_2025-03-05_23-24-37/medmamba_t_Net.pth',
+        model_weight_path='Train_runs/Train_rejection_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1.5_2025-03-06_08-11-41/medmamba_t_Net.pth',
         transform=dict(
             resize=(224, 224),
             normalize=dict(
@@ -205,7 +205,7 @@ class Init:
         confidence=100,
         confidence_values=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
         run_with_different_b=False,
-        b=20
+        b=5
     )
 
 

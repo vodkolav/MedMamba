@@ -11,7 +11,7 @@ from torchvision import transforms, datasets
 import torch.optim as optim
 from tqdm import tqdm
 import pandas as pd
-from MedMamba_rejection_learning_exp import VSSM as medmamba  # import model
+from MedMamba_rejection_learning_entropy import VSSM as medmamba  # import model
 from medmnist import INFO, DermaMNIST
 
 class ConfusionMatrix(object):
@@ -50,7 +50,7 @@ def main():
     print("using {} device.".format(device))
     print(os.getcwd())
     # Create configuration dictionary
-    config = dict(experiment_name="Train_rejection_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1.5",
+    config = dict(experiment_name="Train_Entropy_rejection_Asympt_parameter_Hyperparameter_0.00005_Ridge_alfa_1",
                   MedMNIST_dataset_name="DermaMNIST",
                   train_net="medmamba_t",
                   image_size= 224,
@@ -64,7 +64,7 @@ def main():
                   epochs=10,
                   b_init=2,
                   Hyperparameter=0.00005,
-                  Ridge_alfa=1.5
+                  Ridge_alfa=1
                   )
 
     # Dataset name to class mapping
@@ -293,7 +293,7 @@ def main():
             y = net.b
             L = config["Hyperparameter"]
             E = 0.0000001
-            f = 1/(E +x) + L /(E * y)
+            f = 1/(E + x) + (L * y)
 
             # Minimize the negative of this function to maximize f
             loss = f
