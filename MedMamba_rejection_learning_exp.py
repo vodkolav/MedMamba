@@ -2,6 +2,8 @@ import time
 import math
 from functools import partial
 from typing import Optional, Callable
+
+import numpy as np
 from torch import Tensor
 import torch
 import torch.nn as nn
@@ -762,7 +764,7 @@ class VSSM(nn.Module):
             y_thresh = 10000000000
         else:
             # Calculate rejection threshold using the new self.b
-            y_thresh = (1 - self.b) * confidence / 100 + self.b
+            y_thresh = 2.1**(-0.1 * confidence + self.b) + 1
 
         # Determine maximum probability and second maximum probability
         max_probs, preds = torch.max(softmax_probs, dim=1)
@@ -777,9 +779,9 @@ class VSSM(nn.Module):
         #print(f'max_probs: {max_probs}')
         #print(f'second_max_probs: {second_max_probs}')
         #print(f'max_probs / second_max_probs: {max_probs / second_max_probs}')
-        print(f'confidence_level: {confidence}')
-        print(f'b: {self.b}')
-        print(f'Threshold: {y_thresh}')
+        #print(f'confidence_level: {confidence}')
+        #print(f'b: {self.b}')
+        #print(f'Threshold: {y_thresh}')
 
 
         return softmax_probs, preds, should_reject

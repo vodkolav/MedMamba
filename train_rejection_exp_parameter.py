@@ -11,7 +11,7 @@ from torchvision import transforms, datasets
 import torch.optim as optim
 from tqdm import tqdm
 import pandas as pd
-from MedMamba_rejection_learning import VSSM as medmamba  # import model
+from MedMamba_rejection_learning_exp import VSSM as medmamba  # import model
 from medmnist import INFO, DermaMNIST
 
 class ConfusionMatrix(object):
@@ -50,7 +50,7 @@ def main():
     print("using {} device.".format(device))
     print(os.getcwd())
     # Create configuration dictionary
-    config = dict(experiment_name="Train_rejection_parameter2_Hyperparameter_0.1",
+    config = dict(experiment_name="Train_rejection_exp_2.1_parameter_Hyperparameter_0.00175_Ridge_alfa_1",
                   MedMNIST_dataset_name="DermaMNIST",
                   train_net="medmamba_t",
                   image_size= 224,
@@ -63,7 +63,7 @@ def main():
                   learning_rate=0.01,
                   epochs=10,
                   b_init=5,
-                  Hyperparameter=0.1
+                  Hyperparameter=0.00005
                   )
 
     # Dataset name to class mapping
@@ -160,7 +160,7 @@ def main():
 
     net.to(device)
 
-    optimizer = optim.SGD([net.b], lr=config["learning_rate"])
+    optimizer = optim.SGD([net.b], lr=config["learning_rate"], weight_decay=1)
 
     # Track best AUC
     best_auc = 0
