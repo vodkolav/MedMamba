@@ -785,7 +785,7 @@ class VSSM(nn.Module):
         #print(f'second_max_probs: {second_max_probs}')
         #print(f'max_probs / second_max_probs: {max_probs / second_max_probs}')
         #print(f'confidence_level: {confidence}')
-        #print(f'b: {self.b}')
+        print(f'b: {self.b}')
         #print(f'Threshold: {y_thresh}')
 
 

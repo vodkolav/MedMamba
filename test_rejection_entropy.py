@@ -11,7 +11,7 @@ import matplotlib
 from sklearn.metrics import roc_auc_score, f1_score, auc
 
 matplotlib.use('Agg')  # Use a non-interactive backend
-from MedMamba_rejection1 import VSSM
+from MedMamba_rejection_learning_entropy import VSSM
 from medmnist import INFO, DermaMNIST
 
 
@@ -106,10 +106,10 @@ class ConfusionMatrix(object):
         if (overall_precision + overall_recall) != 0:
             f1_score2 = (2 * overall_precision * overall_recall) / (overall_precision + overall_recall)
         # Calculate AUC using the scores with respect to the labels
-        ROC_AUC_score = 0
-        if len(self.original_scores) > 0:
-            ROC_AUC_score = roc_auc_score(pd.get_dummies(self.original_labels),
-                            np.array(self.original_scores), multi_class='ovr')
+        #ROC_AUC_score = 0
+        #if len(self.original_scores) > 0:
+        #    ROC_AUC_score = roc_auc_score(pd.get_dummies(self.original_labels),
+        #                    np.array(self.original_scores), multi_class='ovr')
 
         print(f"Overall Precision: {overall_precision}")
         print(f"Overall Recall (Sensitivity): {overall_recall}")
@@ -117,7 +117,7 @@ class ConfusionMatrix(object):
         print(f"F1-score: {f1}")
         print(f"F1-score2: {f1_score2}")
         print(f"F1-score3: {overall_F1}")
-        print(f"ROC AUC score: {ROC_AUC_score}")
+        #print(f"ROC AUC score: {ROC_AUC_score}")
         print(f"Average ROC AUC score (across all classes): {average_auc_score}")
 
         # Store metrics for output
@@ -129,7 +129,7 @@ class ConfusionMatrix(object):
             "F1-score": f1,
             "F1-score2": f1_score2,
             "F1-score3": overall_F1,
-            "ROC AUC score": ROC_AUC_score,
+            #"ROC AUC score": ROC_AUC_score,
             "Average ROC AUC score": average_auc_score
         }
 
@@ -165,7 +165,7 @@ class ConfusionMatrix(object):
         plt.xlabel('True Labels')
         plt.ylabel('Predicted Labels')
         plt.title(
-            f'Confusion Matrix with confidence {confidence} and threshold1:{Init.config["thresh1"]} threshold2:{Init.config["thresh2"]} a:{Init.config["a"]:.2f} b:{Init.config["b"]:.2f} c:{Init.config["c"]:.2f}')
+            f'Confusion Matrix with confidence {confidence}')
         thresh = self.matrix.max() / 2
         for x in range(self.num_classes):
             for y in range(self.num_classes):
@@ -187,10 +187,10 @@ class ConfusionMatrix(object):
 class Init:
     # Create configuration dictionary
     config = dict(
-        experiment_name="test_of_thresh1_trained_224_with_rejection",
+        experiment_name="Test_Entropy_rejection_Asympt_parameter_Hyperparameter_0.00005_Ridge_alfa_1",
         MedMNIST_dataset_name="DermaMNIST",
         image_size=224,
-        model_weight_path='Train_runs/Train_2025-02-22_14-08-32/medmamba_t_Net.pth',
+        model_weight_path='Train_runs/Train_Entropy_rejection_Asympt_parameter_Hyperparameter_0.00005_Ridge_alfa_1_2025-03-06_10-50-09/medmamba_t_Net.pth',
         transform=dict(
             resize=(224, 224),
             normalize=dict(
@@ -198,17 +198,14 @@ class Init:
                 std=[0.5, 0.5, 0.5]
             )
         ),
-        batch_size=32,
+        batch_size=128,
         test_net="medmamba_t",  # Choose the appropriate one
         # input "single_confidence_value" for testing a single confidence value or "scan_confidence_values" for multiple
         test_type="scan_confidence_values",
         confidence=100,
         confidence_values=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-        thresh1=True,
-        thresh2=False,
-        a=-5.9,
-        b=942,
-        c=36.4
+        run_with_different_b=False,
+        b=5
     )
 
 
@@ -245,12 +242,6 @@ def setup():
         ])
     }
 
-    #data_root = os.path.abspath(os.path.join(os.getcwd(), "../.."))  # get data root path
-    #image_path = os.path.join(data_root, "data_set", "flower_data")  # flower data set path
-    #assert os.path.exists(image_path), "data path {} does not exist.".format(image_path)
-
-    # validate_dataset = datasets.ImageFolder(root=os.path.join(image_path, "val"),
-    #                                         transform=data_transform)
 
     test_dataset = dataset_class(split="test", download=True, size=Init.config["image_size"],
                                  transform=data_transform["test"])
@@ -261,28 +252,78 @@ def setup():
                                               num_workers=2)
     labels = [v for k, v in test_dataset.info['label'].items()]
     nc = len(labels)
+
     return nc, labels, device, test_loader, experiment_directory, test_dataset
 
 
-def main(nc, labels, device, test_loader, experiment_directory):
-    if Init.config["test_net"] == "medmamba_t":
-        net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"], Init.config["a"],
-                   Init.config["b"], Init.config["c"], depths=[2, 2, 4, 2], dims=[96, 192, 384, 768],
+def load_weights_with_b(net, model_weight_path):
+    # Load pretrained weights
+    loaded_weights = torch.load(model_weight_path)
+
+    # Extract the state dict of the model
+    model_state_dict = net.state_dict()
+
+    # Check if 'b' exists in the loaded weights
+    if 'b' in loaded_weights:
+        # Update only the 'b' parameter
+        net.b.data.copy_(loaded_weights['b'])
+        print("Loaded b parameter from weights.")
+    else:
+        print("b parameter not found in loaded weights, using default initialization.")
+
+    # Filter out the 'b' parameter from the loaded weights
+    filtered_weights = {k: v for k, v in loaded_weights.items() if k in model_state_dict and k != 'b'}
+
+    # Update the model's state dictionary
+    model_state_dict.update(filtered_weights)
+
+    # Load the updated state dictionary into the model
+    net.load_state_dict(model_state_dict)
+
+def model_initiation(confidence):
+
+    print(f'model initiation with confidence level: {confidence}')
+
+    if Init.config["test_net"] == "medmamba_t" and Init.config["run_with_different_b"]:
+        net = VSSM(confidence=confidence, b=Init.config["b"], depths=[2, 2, 4, 2], dims=[96, 192, 384, 768],
                    num_classes=nc).to(device)
-    elif Init.config["test_net"] == "medmamba_s":
-        net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"], Init.config["a"],
-                   Init.config["b"], Init.config["c"], depths=[2, 2, 8, 2], dims=[96, 192, 384, 768],
+    elif Init.config["test_net"] == "medmamba_t" and Init.config["run_with_different_b"] == False:
+        net = VSSM(confidence=confidence, depths=[2, 2, 4, 2], dims=[96, 192, 384, 768],
+                   num_classes=nc).to(device)
+    elif Init.config["test_net"] == "medmamba_s" and Init.config["run_with_different_b"]:
+        net = VSSM(confidence=confidence, b=Init.config["b"], depths=[2, 2, 8, 2], dims=[96, 192, 384, 768],
                    num_classes=Init.nc).to(device)
-    elif Init.config["test_net"] == "medmamba_b":
-        net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"], Init.config["a"],
-                   Init.config["b"], Init.config["c"], depths=[2, 2, 12, 2], dims=[128, 256, 512, 1024],
+    elif Init.config["test_net"] == "medmamba_s" and Init.config["run_with_different_b"] == False:
+        net = VSSM(confidence=confidence, depths=[2, 2, 8, 2], dims=[96, 192, 384, 768],
+                   num_classes=Init.nc).to(device)
+    elif Init.config["test_net"] == "medmamba_b"  and Init.config["run_with_different_b"]:
+        net = VSSM(confidence=confidence, b=Init.config["b"], depths=[2, 2, 12, 2], dims=[128, 256, 512, 1024],
+                   num_classes=nc).to(device)
+    elif Init.config["test_net"] == "medmamba_b"  and Init.config["run_with_different_b"] == False:
+        net = VSSM(confidence=confidence, depths=[2, 2, 12, 2], dims=[128, 256, 512, 1024],
                    num_classes=nc).to(device)
 
     # load pretrain weights
     model_weight_path = Init.config["model_weight_path"]
     assert os.path.exists(model_weight_path), f"cannot find {model_weight_path} file"
     weights = torch.load(model_weight_path, map_location=device)
-    net.load_state_dict(weights)
+
+    if Init.config["run_with_different_b"]:
+        model_state_dict = net.state_dict() # Get the current model's state dictionary
+        # Filter out the 'b' parameter from the loaded weights
+        filtered_weights = {k: v for k, v in weights.items() if k in model_state_dict and k != 'b'}
+        # Update the model's state dictionary with filtered weights
+        model_state_dict.update(filtered_weights)
+        # Load the updated state dictionary into the model
+        net.load_state_dict(model_state_dict)
+    else:
+        load_weights_with_b(net, model_weight_path)
+
+    return net
+
+
+def main(nc, labels, device, test_loader, experiment_directory):
+    net = model_initiation(confidence=Init.config["confidence"])
     net.to(device)
 
     confusion = ConfusionMatrix(num_classes=nc, labels=labels)
@@ -291,7 +332,7 @@ def main(nc, labels, device, test_loader, experiment_directory):
     with torch.no_grad():
         for val_data in tqdm(test_loader):
             val_images, val_labels = val_data
-            softmax_probs, preds, should_reject = net(val_images.to(device))
+            softmax_probs, preds, should_reject = net(val_images.to(device), confidence=Init.config["confidence"])
             # Convert torch tensor to numpy
             preds = preds.cpu().numpy()
             should_reject = should_reject.cpu().numpy()
@@ -306,11 +347,6 @@ def main(nc, labels, device, test_loader, experiment_directory):
             print(f"Predictions after applying rejection logic: {preds}")
             print(confusion.matrix)  # State of the matrix before update
             confusion.update(preds, val_labels, scores)
-            #scores = torch.softmax(outputs, dim=1)  # Use scores for AUC
-            #preds = torch.argmax(scores, dim=1)
-            #confusion.update(preds.to("cpu").numpy(),
-            #                 val_labels.to("cpu").numpy(),
-            #                 scores.to("cpu").numpy())
 
     print(f"Rejections in this batch: {rejection_count}")
 
@@ -324,28 +360,8 @@ def run_tests_with_confidence(confidence_values, nc, labels, device, test_loader
     results = {}
 
     for confidence in confidence_values:
-        # Modify the config dictionary for the current confidence
-        Init.config["confidence"] = confidence
-
-        # Initialize the model with the current confidence
-        if Init.config["test_net"] == "medmamba_t":
-            net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"],
-                       Init.config["a"], Init.config["b"], Init.config["c"], depths=[2, 2, 4, 2],
-                       dims=[96, 192, 384, 768], num_classes=nc).to(device)
-        elif Init.config["test_net"] == "medmamba_s":
-            net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"],
-                       Init.config["a"], Init.config["b"], Init.config["c"], depths=[2, 2, 8, 2],
-                       dims=[96, 192, 384, 768], num_classes=nc).to(device)
-        elif Init.config["test_net"] == "medmamba_b":
-            net = VSSM(Init.config["confidence"], Init.config["thresh1"], Init.config["thresh2"],
-                       Init.config["a"], Init.config["b"], Init.config["c"], depths=[2, 2, 12, 2],
-                       dims=[128, 256, 512, 1024], num_classes=nc).to(device)
-
-        # Load pretrain weights
-        model_weight_path = Init.config["model_weight_path"]
-        assert os.path.exists(model_weight_path), f"cannot find {model_weight_path} file"
-        weights = torch.load(model_weight_path, map_location=device)
-        net.load_state_dict(weights)
+        print(f'now running with confidence level: {confidence}')
+        net = model_initiation(confidence=confidence)
         net.to(device)
 
         # Initialize Confusion Matrix
@@ -361,7 +377,7 @@ def run_tests_with_confidence(confidence_values, nc, labels, device, test_loader
         with torch.no_grad():
             for val_data in tqdm(test_loader):
                 val_images, val_labels = val_data
-                softmax_probs, preds, should_reject = net(val_images.to(device))
+                softmax_probs, preds, should_reject = net(val_images.to(device), confidence=confidence)
                 preds = preds.cpu().numpy()
                 should_reject = should_reject.cpu().numpy()
                 val_labels = val_labels.cpu().numpy()
@@ -375,14 +391,14 @@ def run_tests_with_confidence(confidence_values, nc, labels, device, test_loader
 
                 # Track rejection statistics
                 rejection_count += np.sum(should_reject)
-
+                print(f'rejection_count:{rejection_count}')
         # Calculate percentage of rejections
         rejection_percentage = (rejection_count / total_samples) * 100
 
         # Calculate overall accuracy excluding rejections
         valid_preds = preds[preds != confusion.num_classes - 1]  # Exclude rejected predictions
         valid_labels = val_labels[preds != confusion.num_classes - 1]
-        valid_labels = valid_labels.squeeze()  # Flatten the labels to remove extra dimension
+        valid_labels = torch.tensor(valid_labels).reshape(-1)
         # Calculate overall accuracy excluding rejections
         if len(valid_labels) > 0:
             valid_accuracy_count = np.sum(valid_preds == valid_labels)

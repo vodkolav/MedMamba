@@ -17,7 +17,7 @@ def main():
     print("using {} device.".format(device))
     print(os.getcwd())
     # Create configuration dictionary
-    config = dict(experiment_name="Train_lr_change_image_224_bs_32",
+    config = dict(experiment_name="Ofir_DermaMNIST_baseline",
                   MedMNIST_dataset_name="DermaMNIST",
                   train_net="medmamba_t",
                   fine_tune=False,

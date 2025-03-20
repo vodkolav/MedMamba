@@ -187,10 +187,10 @@ class ConfusionMatrix(object):
 class Init:
     # Create configuration dictionary
     config = dict(
-        experiment_name="test_with_weights_of_b_parameter_training_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1.5",
+        experiment_name="Test_Entropy_rejection_Asympt_parameter_Hyperparameter_0.00005_Ridge_alfa_1",
         MedMNIST_dataset_name="DermaMNIST",
         image_size=224,
-        model_weight_path='Train_runs/Train_rejection_exp_2.1_parameter_Hyperparameter_0.00005_Ridge_alfa_1.5_2025-03-06_08-11-41/medmamba_t_Net.pth',
+        model_weight_path='Train_runs/Train_Entropy_rejection_Asympt_parameter_Hyperparameter_0.00005_Ridge_alfa_1_2025-03-06_10-50-09/medmamba_t_Net.pth',
         transform=dict(
             resize=(224, 224),
             normalize=dict(
