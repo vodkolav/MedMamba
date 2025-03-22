@@ -27,17 +27,20 @@ sudo apt install cuda-toolkit-11-8
 
 # add these lines to the end of ~/.bashrc of current user
 export CUDA_HOME=/usr/local/cuda-11.8
+export PATH=/usr/local/cuda-11.8/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-# reopen terminal 
+# reopen terminal  (or source ~/.bashrc)
 echo CUDA_HOME is now $CUDA_HOME
 # add newly installed cuda to path
 #export PATH=$PATH:/usr/local/cuda-11.8/bin
 
-# install specific pytorch
-#pip uninstall torch torchaudio torchvision # first uninstall all other versions of torch that we don't need
-pip install torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu118  --no-cache-dir
-wget https://github.com/state-spaces/mamba/releases/download/v2.0.4/mamba_ssm-2.0.4+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-pip install mamba_ssm-2.0.4+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+# install specific pytorch 2.0.1+cu118
+pip uninstall torch torchaudio torchvision # first uninstall all other versions of torch that we don't need
+pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2 --extra-index-url https://download.pytorch.org/whl/cu118  --no-cache-dir
+
+# download and install mamba_ssm
+wget https://github.com/state-spaces/mamba/releases/download/v2.0.4/mamba_ssm-2.0.4+cu118torch2.0cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+pip install mamba_ssm-2.0.4+cu118torch2.0cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 
 # compile and install causal-conv1d
 git clone https://github.com/Dao-AILab/causal-conv1d.git
